@@ -1,0 +1,164 @@
+# ---------------------------------------------------------------------------
+# Garage of Utility Stuff (GUS)
+# Target stack: SvelteKit 2 / Svelte 5 / TypeScript, pnpm + Turborepo,
+#               SQLite + Drizzle, Tailwind v4 + shadcn-svelte, Docker.
+#
+# Committed on purpose (do NOT ignore):
+#   pnpm-lock.yaml            reproducible installs
+#   packages/db/drizzle/      database migrations
+#   .env.example              documented config surface
+#   docker-compose.yml        default self-host deployment
+# ---------------------------------------------------------------------------
+
+# ------------------------------- OS metadata -------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.VolumeIcon.icns
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --------------------------------- Editors ---------------------------------
+.idea/
+.vscode/*
+! .vscode/extensions.json
+! .vscode/settings.json
+! .vscode/launch.json
+*.swp
+*.swo
+*~
+.project
+.settings/
+.history/
+
+# ------------------------------ Env & secrets ------------------------------
+# Never commit real credentials. Ship .env.example instead.
+.env
+.env.*
+! .env.example
+! .env.*.example
+*.local
+(.secret
+.secrets
+/secrets/
+*.pem
+*.p12
+*.pfx
+*.jks
+# Local TLS certs generated for dev
+certs/
+
+# --------------------------- Node / pnpm / Turbo ---------------------------
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.nx/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+.prettiercache
+
+# Require the lockfile in every workspace.
+!pnpm-lock.yaml
+
+# ------------------------------ SvelteKit ---------------------------------
+# SvelteKit 2 builds land under .svelte-kit/ and the `build/` folder.
+.svelte-kit/
+build/
+out/
+static/.vite/
+.svelte-kit/out/
+
+# ------------------------------ Vite / SvelteKit cache ----------------------
+.cache/
+.vite/
+
+# ------------------------------ Adapters / generic bundles ------------------
+dist/
+dist-ssr/
+out/
+.vercel/
+.netlify/
+.wrangler/
+.nitro/
+.cache/
+.vite/
+
+# Static site generator (current GitHub Pages build)
+_site/
+scripts/.cache/
+
+# --------------------------------- Testing ---------------------------------
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.vitest/
+__snapshots__/*.snap.new
+
+# -------------------------- GUS runtime data -------------------------------
+# Everything a self-hosted instance writes at runtime lives under /data.
+# Keep it out of git: it holds the SQLite DB, encrypted secrets and logs.
+/data/
+/backups/
+.gus/
+*gus-backup
+
+# SQLite (WAL mode leaves -wal and -shm sidecars behind)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Drizzle: keep generated SQL migrations, ignore local scratch output
+packages/db/drizzle/meta/_journal.json.bak
+
+# Database dumps / exports
+*.dump
+*.sql.gz
+
+# Litestream local replica state
+.litestream/
+litestream-restore/
+
+# ------------------------------- Logs --------------------------------------
+logs/
+*.log
+
+# ------------------------------- Docker ------------------------------------
+docker-compose.override.yml
+docker-compose.*.local.yml
+.docker/
+*.tar
+
+# ------------------------ Plugin / utility dev state -----------------------
+# Per-plugin scratch dirs used while developing utilities locally.
+packages/plugins/*/.dev-data/
+packages/plugins/*/tmp/
+
+# ------------------------------ Misc caches --------------------------------
+.cache-loader/
+*.pid
+*.seed
+*.tgz
+
+# SvelteKit virtual imports / build artifacts
+.svelte-kit/out/
