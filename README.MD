@@ -39,4 +39,13 @@ node apps/web/build
 
 ## License
 
-See [LICENSE](LICENSE).
+GUS is primarily licensed under the [GNU Affero General Public License, Version 3.0 or later](LICENSE.MD).
+
+- [LICENSE.MD](LICENSE.MD) — the AGPL-3.0-or-later license text.
+- [EXCEPTIONS.MD](EXCEPTIONS.MD) — the plugin exception.
+- [CLA.MD](CLA.MD) — the Contributor License Agreement.
+- [COMMERCIAL.MD](COMMERCIAL.MD) — commercial licensing terms.
+- [NOTICE.MD](NOTICE.MD) — third-party notices.
+- [TRADEMARK.MD](TRADEMARK.MD) — trademark and branding.
+
+See [LICENSE.MD](LICENSE.MD).

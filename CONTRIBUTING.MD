@@ -50,6 +50,19 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 - Split large work into smaller, reviewable pull requests.
 - Unrelated changes may be asked to move to a separate PR before review.
 
+## Contributor License Agreement
+
+Before a pull request can be merged, you must agree to the Contributor License
+Agreement in `CLA.MD`. This is handled automatically:
+
+- The **CLA Assistant** GitHub App checks every pull request.
+- If you have not signed, the app posts a comment with instructions.
+- Signing is a one-time action per contributor.
+
+The CLA grants the Project Owners a perpetual, irrevocable, royalty-free license
+to your contribution, including the right to relicense it under commercial terms.
+See `CLA.MD` for the full text.
+
 ## Pull request limits
 
 This repository has temporary interaction restrictions enabled.
@@ -87,3 +100,7 @@ For help using the project or questions about contributing, see `.github/SUPPORT
 ## License
 
 By contributing, you agree that your contributions are licensed under the terms in `LICENSE.MD`.
+
+All contributions require a signed Contributor License Agreement (`CLA.MD`).
+Plugins distributed under the plugin exception in `EXCEPTIONS.MD` are not
+subject to the terms of `LICENSE.MD`.
