@@ -969,7 +969,7 @@ async function build() {
     }
   }
 
-  const neededIcons = new Set([...listed.map((page) => page.icon), 'folder']);
+  const neededIcons = new Set([...listed.map((page) => page.icon), 'folder', 'sun', 'moon']);
 
   const svgs = new Map();
   await Promise.all([...neededIcons].map(async (name) => {
@@ -994,6 +994,53 @@ async function build() {
   for (const section of sections) {
     for (const page of section.all) sectionOf.set(page, section);
   }
+
+  const item = (page, label = page.name) => {
+    const name = typeof label === 'string' ? label : (typeof page.name === 'string' ? page.name : '');
+    const snippet = typeof page.snippet === 'string' ? page.snippet : '';
+    const search = `${name} ${page.url} ${snippet.replace(/\n/g, ' ')}`.toLowerCase();
+    return [
+      `  <li data-file data-search="${escapeAttr(search)}">`,
+      `    <a href="${escapeAttr(page.url)}">`,
+      `      ${icons.get(page.icon)}`,
+      `      <span class="name">${escapeHtml(name)}</span>`,
+      snippet ? `      <span class="snippet">${escapeHtml(snippet)}</span>` : '',
+      '    </a>',
+      '  </li>',
+    ].filter(Boolean).join('\n');
+  };
+
+  // Build each group's file list, optionally with folder dropdowns.
+  const folderBlock = (folder) => [
+    '    <details class="folder">',
+    `      <summary>${icons.get('folder')} ${escapeHtml(folder.title)}</summary>`,
+    '      <ul class="files">',
+    folder.pages.map((p) => item(p, p.shortName || p.name)).join('\n'),
+    '      </ul>',
+    '    </details>',
+  ].join('\n');
+
+  const list = sections.map((section) => {
+    // Collect any pages that are not in a folder, to show after the folders.
+    const folderPageSet = new Set();
+    for (const folder of section.folders || []) for (const p of folder.pages) folderPageSet.add(p);
+    const plainPages = section.all.filter((p) => !folderPageSet.has(p));
+
+    const rows = [];
+    if (section.folders?.length) {
+      for (const folder of section.folders) rows.push(folderBlock(folder));
+    }
+    if (plainPages.length) {
+      const plainItems = plainPages.map(item).join('\n');
+      rows.push(`    <ul class="files">${plainItems}</ul>`);
+    }
+    return [
+      '  <section class="group" data-group>',
+      section.title ? `    <h2>${escapeHtml(section.title)}</h2>` : '',
+      ...rows,
+      '  </section>',
+    ].filter(Boolean).join('\n');
+  }).join('\n\n');
 
   for (const document of documents) {
     const { target, raw, title, page } = document;
@@ -1044,12 +1091,26 @@ async function build() {
       `<link rel="stylesheet" href="${prefix}assets/site.css">`,
       '</head>',
       `<body id="top">`,
+      '<div class="layout">',
+      '<aside class="all-pages" aria-label="All pages">',
+      '  <h2>All pages</h2>',
+      '  <input id="q" type="search" placeholder="Search" aria-label="Search files" autocomplete="off" spellcheck="false">',
+      '  <div id="pages">',
+      list,
+      '  </div>',
+      '  <p class="empty" id="empty" hidden>No matching files.</p>',
+      '</aside>',
       `<main class="markdown-body">\n${body}\n</main>`,
       relatedHtml,
+      '</div>',
       '<div class="fabs">',
       `<a class="back" href="${prefix}index.html" aria-label="Back" title="Back">`,
       '<svg class="top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 18l-3-3 3-3"/></svg>',
       '</a>',
+      '<button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">',
+      '<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
+      '<svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+      '</button>',
       '<a class="top" href="#top" aria-label="Back to top" title="Back to top">',
       '<svg class="ring" viewBox="0 0 40 40" aria-hidden="true" focusable="false">',
       '<circle class="ring-track" cx="20" cy="20" r="17"></circle>',
@@ -1059,6 +1120,35 @@ async function build() {
       '</a>',
       '</div>',
       `<script src="${prefix}assets/site.js" defer></script>`,
+      '<script>',
+      '  (function () {',
+      '    var input = document.getElementById(\'q\');',
+      '    var items = Array.prototype.slice.call(document.querySelectorAll(\'[data-file]\'));',
+      '    var sections = Array.prototype.slice.call(document.querySelectorAll(\'[data-group]\'));',
+      '    var empty = document.getElementById(\'empty\');',
+      '',
+      '    input.addEventListener(\'input\', function () {',
+      '      var query = input.value.trim().toLowerCase();',
+      '      var shown = 0;',
+      '      for (var i = 0; i < items.length; i++) {',
+      '        var match = !query || items[i].getAttribute(\'data-search\').indexOf(query) !== -1;',
+      '        items[i].hidden = !match;',
+      '        if (match) shown++;',
+      '      }',
+      '      for (var j = 0; j < sections.length; j++) {',
+      '        sections[j].hidden = !sections[j].querySelector(\'[data-file]:not([hidden])\');',
+      '      }',
+      '      empty.hidden = shown !== 0;',
+      '    });',
+      '',
+      '    document.addEventListener(\'keydown\', function (event) {',
+      '      if (event.key === \'/\' && document.activeElement !== input) {',
+      '        event.preventDefault();',
+      '        input.focus();',
+      '      }',
+      '    });',
+      '  })();',
+      '</script>',
       '</body>',
       '</html>',
       '',
@@ -1068,52 +1158,6 @@ async function build() {
     await writeFile(target, html, 'utf8');
   }
 
-  const item = (page, label = page.name) => {
-    const name = typeof label === 'string' ? label : (typeof page.name === 'string' ? page.name : '');
-    const snippet = typeof page.snippet === 'string' ? page.snippet : '';
-    const search = `${name} ${page.url} ${snippet.replace(/\n/g, ' ')}`.toLowerCase();
-    return [
-      `  <li data-file data-search="${escapeAttr(search)}">`,
-      `    <a href="${escapeAttr(page.url)}">`,
-      `      ${icons.get(page.icon)}`,
-      `      <span class="name">${escapeHtml(name)}</span>`,
-      snippet ? `      <span class="snippet">${escapeHtml(snippet)}</span>` : '',
-      '    </a>',
-      '  </li>',
-    ].filter(Boolean).join('\n');
-  };
-
-  // Build each group's file list, optionally with folder dropdowns.
-  const folderBlock = (folder) => [
-    '    <details class="folder">',
-    `      <summary>${icons.get('folder')} ${escapeHtml(folder.title)}</summary>`,
-    '      <ul class="files">',
-    folder.pages.map((p) => item(p, p.shortName || p.name)).join('\n'),
-    '      </ul>',
-    '    </details>',
-  ].join('\n');
-
-  const list = sections.map((section) => {
-    // Collect any pages that are not in a folder, to show after the folders.
-    const folderPageSet = new Set();
-    for (const folder of section.folders || []) for (const p of folder.pages) folderPageSet.add(p);
-    const plainPages = section.all.filter((p) => !folderPageSet.has(p));
-
-    const rows = [];
-    if (section.folders?.length) {
-      for (const folder of section.folders) rows.push(folderBlock(folder));
-    }
-    if (plainPages.length) {
-      const plainItems = plainPages.map(item).join('\n');
-      rows.push(`    <ul class="files">${plainItems}</ul>`);
-    }
-    return [
-      '  <section class="group" data-group>',
-      section.title ? `    <h2>${escapeHtml(section.title)}</h2>` : '',
-      ...rows,
-      '  </section>',
-    ].filter(Boolean).join('\n');
-  }).join('\n\n');
 
   // Homepage content: the README body, with a title if it has no heading.
   let content = '';

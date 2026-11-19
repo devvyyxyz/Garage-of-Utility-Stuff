@@ -5,25 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%TITLE%</title>
 <!-- Icons: Lucide 1.75.0 (ISC) - https://lucide.dev -->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {}
+  })();
+</script>
 <link rel="stylesheet" href="assets/github-markdown.css">
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<main class="markdown-body" id="home">
-%CONTENT%
-</main>
+<div class="layout">
+  <aside class="all-pages" aria-label="All pages">
+    <h2>All pages <span class="count">%COUNT%</span></h2>
 
-<section class="all-pages">
-  <h2>All pages <span class="count">%COUNT%</span></h2>
+    <input id="q" type="search" placeholder="Search" aria-label="Search files" autocomplete="off" spellcheck="false">
 
-  <input id="q" type="search" placeholder="Search" aria-label="Search files" autocomplete="off" spellcheck="false">
+    <div id="pages">
+      %LIST%
+    </div>
 
-  <div id="pages">
-%LIST%
-  </div>
+    <p class="empty" id="empty" hidden>No matching files.</p>
+  </aside>
 
-  <p class="empty" id="empty" hidden>No matching files.</p>
-</section>
+  <main class="markdown-body" id="home">
+    %CONTENT%
+  </main>
+</div>
+
+<div class="fabs">
+  <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+  <a class="top" href="#top" aria-label="Back to top" title="Back to top">
+    <svg class="ring" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+      <circle class="ring-track" cx="20" cy="20" r="17"></circle>
+      <circle class="ring-bar" cx="20" cy="20" r="17"></circle>
+    </svg>
+    <svg class="top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
+  </a>
+</div>
 
 <script>
   (function () {
@@ -54,5 +79,6 @@
     });
   })();
 </script>
+<script src="assets/site.js" defer></script>
 </body>
 </html>

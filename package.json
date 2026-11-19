@@ -1,0 +1,15 @@
+{
+  "name": "gus-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Garage of Utility Stuff documentation site",
+  "scripts": {
+    "build": "node scripts/build-index.mjs",
+    "serve": "node scripts/serve.mjs",
+    "dev": "node scripts/serve.mjs --watch",
+    "start": "node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
