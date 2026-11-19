@@ -1,0 +1,55 @@
+# Documentation configuration for scripts/build-index.mjs
+#
+# Supported YAML subset: nested "key: value" mappings, "- " sequences,
+# inline lists such as [a, b], 'quoted' strings, and # comments.
+
+site:
+  title: Garage of Utility Stuff
+  # Markdown file rendered at the top of the homepage. It is not listed below.
+  home: README.MD
+
+icons:
+  # Icon set used for the page list. Only lucide is supported.
+  set: lucide
+  version: 1.75.0
+  # Fallback for pages that match neither a name rule nor a file type.
+  default: file
+
+# Every Markdown file in the project is published automatically. Entries here
+# are optional: they only override the icon for a specific page.
+pages:
+  - path: LICENSE.MD
+    icon: scale
+  - path: CONTRIBUTING.MD
+    icon: git-pull-request
+
+# Groups describe what pages are for, not where they live. Each group becomes a
+# heading in the page list, its icon applies to members without their own icon,
+# and member pages link to their siblings at the bottom of the page. Pages
+# missing from every group are listed under "Other".
+#
+# "folders" lists directories relative to the project root. Every Markdown file
+# inside them is claimed by the group automatically and shown as a dropdown
+# named after the folder (e.g. ".github/ISSUE_TEMPLATE" -> "Issue Template").
+groups:
+  - title: Project
+    icon: git-pull-request
+    pages:
+      - CONTRIBUTING.MD
+      - .github/SUPPORT.MD
+  - title: Policies
+    icon: shield
+    pages:
+      - LICENSE.MD
+      - .github/SECURITY.MD
+      - .github/CODE_OF_CONDUCT.MD
+  - title: Reference
+    icon: book-open
+    pages:
+      - docs/ACKNOWLEDGMENTS.MD
+      - docs/CODEOWNERS.MD
+  - title: Templates
+    icon: file-text
+    folders:
+      - .github/ISSUE_TEMPLATE
+      - .github/PULL_REQUEST_TEMPLATE

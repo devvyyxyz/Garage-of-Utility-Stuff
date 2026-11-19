@@ -1,0 +1,333 @@
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --text: #1b222c;
+  --muted: #5c6875;
+  --border: #e3e7ec;
+  --surface: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 40rem;
+  padding: 3rem 1.25rem 5rem;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------------------------------------------------------------- index */
+
+h1 {
+  text-align: center;
+}
+
+input[type="search"] {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.7rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+input[type="search"]:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
+
+.files {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.files li {
+  border-bottom: 1px solid var(--border);
+}
+
+.files a {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  column-gap: 0.6rem;
+  align-items: start;
+  padding: 0.65rem 0;
+}
+
+.icon {
+  grid-row: 1 / span 2;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  color: var(--muted);
+}
+
+.files a:hover .name {
+  text-decoration: underline;
+}
+
+.files a:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.name {
+  grid-column: 2;
+  display: block;
+}
+
+.snippet {
+  grid-column: 2;
+  display: block;
+  color: var(--muted);
+  font-size: 0.875rem;
+  white-space: pre-line;
+}
+
+.empty {
+  margin: 1.5rem 0;
+  color: var(--muted);
+}
+
+.all-pages {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.all-pages > h2 {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.all-pages > h2 .count {
+  font-weight: 400;
+}
+
+.group + .group {
+  margin-top: 2rem;
+}
+
+.group h2 {
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------- floating page buttons */
+
+.fabs {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.fabs a {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+.fabs a:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+.fabs a:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.fabs a svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.fabs .top {
+  position: relative;
+}
+
+.fabs .top .ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.fabs .top .ring circle {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.fabs .top .ring-track {
+  stroke: var(--border);
+}
+
+.fabs .top .ring-bar {
+  stroke: var(--text);
+  stroke-linecap: round;
+  stroke-dasharray: 106.8;
+  stroke-dashoffset: 106.8;
+  transition: stroke-dashoffset 80ms linear;
+}
+
+.fabs .top .top-icon {
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------- page metadata under titles */
+
+.page-meta {
+  margin: 0.25rem 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.page-meta strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* -------------------------------------------------- folder dropdown lists */
+
+.folder {
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.folder summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.folder summary::-webkit-details-marker {
+  display: none;
+}
+
+.folder summary::before {
+  content: "";
+  width: 0.35rem;
+  height: 0.35rem;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 120ms ease;
+}
+
+.folder[open] summary::before {
+  transform: rotate(45deg);
+}
+
+.folder summary .name {
+  font-weight: 600;
+}
+
+.folder .files {
+  margin: 0 0 0.5rem 1.45rem;
+  border-top: 1px dashed var(--border);
+}
+
+.folder .files li:last-child {
+  border-bottom: none;
+}
+
+.folder .files a {
+  padding: 0.4rem 0;
+}
+
+/* ------------------------------------------- markdown pages (GitHub styles) */
+
+.related {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.related h2 {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.related ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.related li + li {
+  margin-top: 0.15rem;
+}
+
+.related a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+}
+
+.related a:hover span {
+  text-decoration: underline;
+}
+
+.related a:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.related .icon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+/* ------------------------------------------- markdown pages (GitHub styles) */
+
+/* github-markdown.css is downloaded at build time and linked before this file. */
+.markdown-body {
+  font-size: 1rem;
+}
+
+.markdown-body h1 {
+  text-align: center;
+}

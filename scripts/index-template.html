@@ -4,255 +4,54 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%TITLE%</title>
-<meta name="description" content="A garage of small, self-hosted utilities.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%B0%3C/text%3E%3C/svg%3E">
-<style>
-  :root {
-    color-scheme: light dark;
-    --bg: #0a0d12;
-    --bg-soft: #0f141b;
-    --surface: #111823;
-    --surface-hi: #16202d;
-    --border: #1f2a38;
-    --border-hi: #2b3a4d;
-    --text: #e8eef7;
-    --muted: #8b9bb0;
-    --accent: #ffb020;
-    --accent-soft: rgba(255, 176, 32, 0.14);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -20px rgba(0, 0, 0, 0.85);
-  }
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg: #f7f9fc;
-      --bg-soft: #eef2f7;
-      --surface: #ffffff;
-      --surface-hi: #ffffff;
-      --border: #dde5ee;
-      --border-hi: #c6d2e0;
-      --text: #101722;
-      --muted: #5b6b80;
-      --accent: #b96f00;
-      --accent-soft: rgba(185, 111, 0, 0.1);
-      --shadow: 0 1px 2px rgba(16, 23, 34, 0.06), 0 18px 40px -24px rgba(16, 23, 34, 0.28);
-    }
-  }
-
-  * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
-
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    padding: 0 clamp(16px, 4vw, 40px) 80px;
-    background:
-      radial-gradient(60rem 30rem at 50% -12rem, var(--accent-soft), transparent 70%),
-      var(--bg);
-    color: var(--text);
-    font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap { width: 100%; max-width: 1040px; margin: 0 auto; }
-
-  header.hero { padding: clamp(40px, 8vw, 84px) 0 clamp(18px, 3vw, 28px); }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 999px;
-    background: var(--bg-soft); color: var(--muted);
-    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-  h1 {
-    margin: 1rem 0 0.5rem;
-    font-size: clamp(2rem, 5.5vw, 3rem);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-  h1 span { color: var(--accent); }
-  .lede { margin: 0; max-width: 46ch; color: var(--muted); font-size: clamp(1rem, 2.2vw, 1.1rem); }
-
-  .toolbar {
-    position: sticky; top: 0; z-index: 10;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
-    margin: 1.75rem 0 1.5rem; padding: 12px 0;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    background: linear-gradient(var(--bg), color-mix(in srgb, var(--bg) 92%, transparent));
-    border-bottom: 1px solid transparent;
-  }
-  @supports (backdrop-filter: blur(8px)) {
-    .toolbar {
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: color-mix(in srgb, var(--surface) 72%, transparent);
-      backdrop-filter: blur(12px) saturate(140%);
-    }
-  }
-  .search {
-    position: relative; flex: 1 1 260px; display: flex; align-items: center;
-  }
-  .search svg { position: absolute; left: 12px; width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
-  .search input {
-    width: 100%; padding: 0.65rem 2.6rem 0.65rem 2.3rem;
-    color: var(--text); background: var(--bg-soft);
-    border: 1px solid var(--border); border-radius: 10px;
-    font: inherit; font-size: 0.95rem;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .search input::placeholder { color: var(--muted); }
-  .search input:focus-visible {
-    outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-  kbd {
-    position: absolute; right: 10px;
-    padding: 0.1rem 0.4rem; border: 1px solid var(--border-hi); border-radius: 6px;
-    background: var(--surface-hi); color: var(--muted);
-    font: 600 0.72rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-  }
-  .status { margin: 0; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
-
-  .section { margin-top: 2.25rem; }
-  .section:first-of-type { margin-top: 0.5rem; }
-  .section h2 {
-    display: flex; align-items: center; gap: 0.6rem;
-    margin: 0 0 0.9rem;
-    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--muted);
-  }
-  .section h2::after { content: ""; flex: 1; height: 1px; background: var(--border); }
-  .section h2 .count {
-    padding: 0.05rem 0.45rem; border-radius: 999px;
-    background: var(--bg-soft); border: 1px solid var(--border);
-    font-size: 0.7rem; letter-spacing: 0;
-  }
-
-  .grid {
-    display: grid; gap: 14px;
-    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  }
-
-  .card {
-    position: relative; display: flex; flex-direction: column; gap: 0.35rem;
-    padding: 1.05rem 1.1rem 0.95rem;
-    color: inherit; text-decoration: none;
-    background: linear-gradient(180deg, var(--surface), var(--surface));
-    border: 1px solid var(--border); border-radius: 14px;
-    box-shadow: var(--shadow);
-    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-  }
-  .card::after {
-    content: "\2197";
-    position: absolute; top: 0.9rem; right: 1rem;
-    color: var(--muted); font-size: 1rem; line-height: 1;
-    opacity: 0; transform: translate(-4px, 4px);
-    transition: opacity 0.18s ease, transform 0.18s ease, color 0.18s ease;
-  }
-  .card:hover { transform: translateY(-2px); border-color: var(--border-hi); background: var(--surface-hi); }
-  .card:hover::after { opacity: 1; transform: none; color: var(--accent); }
-  .card:focus-visible {
-    outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow);
-  }
-  .card h3 {
-    margin: 0; padding-right: 1.4rem;
-    font-size: 1.02rem; font-weight: 650; letter-spacing: -0.01em; line-height: 1.35;
-  }
-  .card p {
-    margin: 0; color: var(--muted); font-size: 0.875rem;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .card .path {
-    margin-top: auto; padding-top: 0.5rem;
-    color: var(--muted); opacity: 0.8;
-    font: 0.72rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-    word-break: break-all;
-  }
-
-  .empty {
-    padding: 3rem 1rem; text-align: center;
-    color: var(--muted); border: 1px dashed var(--border); border-radius: 14px;
-  }
-  .empty strong { display: block; margin-bottom: 0.25rem; color: var(--text); }
-
-  footer {
-    margin-top: 3rem; padding-top: 1.25rem;
-    border-top: 1px solid var(--border);
-    color: var(--muted); font-size: 0.8rem;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
-    .card:hover { transform: none; }
-  }
-</style>
+<!-- Icons: Lucide 1.75.0 (ISC) - https://lucide.dev -->
+<link rel="stylesheet" href="assets/github-markdown.css">
+<link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<div class="wrap">
-  <header class="hero">
-    <p class="eyebrow"><span class="dot"></span>Self-hosted</p>
-    <h1>%HEADING%</h1>
-    <p class="lede">%LEDE%</p>
-  </header>
+<main class="markdown-body" id="home">
+%CONTENT%
+</main>
 
-  <div class="toolbar">
-    <label class="search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-      <input id="q" type="search" placeholder="Filter pages&hellip;" autocomplete="off" spellcheck="false" aria-label="Filter pages">
-      <kbd aria-hidden="true">/</kbd>
-    </label>
-    <p class="status" id="status" aria-live="polite">%COUNT%</p>
+<section class="all-pages">
+  <h2>All pages <span class="count">%COUNT%</span></h2>
+
+  <input id="q" type="search" placeholder="Search" aria-label="Search files" autocomplete="off" spellcheck="false">
+
+  <div id="pages">
+%LIST%
   </div>
 
-  <main id="pages">
-%SECTIONS%
-  </main>
-
-  <div class="empty" id="empty" hidden>
-    <strong>No pages match that filter.</strong>
-    Try a shorter search, or press <kbd style="position:static;margin:0 2px">Esc</kbd> to clear it.
-  </div>
-
-  <footer>%GENERATED%</footer>
-</div>
+  <p class="empty" id="empty" hidden>No matching files.</p>
+</section>
 
 <script>
   (function () {
     var input = document.getElementById('q');
-    var status = document.getElementById('status');
+    var items = Array.prototype.slice.call(document.querySelectorAll('[data-file]'));
+    var sections = Array.prototype.slice.call(document.querySelectorAll('[data-group]'));
     var empty = document.getElementById('empty');
-    var cards = Array.prototype.slice.call(document.querySelectorAll('[data-page]'));
-    var sections = Array.prototype.slice.call(document.querySelectorAll('[data-section]'));
-    var total = cards.length;
 
-    function apply() {
-      var q = input.value.trim().toLowerCase();
+    input.addEventListener('input', function () {
+      var query = input.value.trim().toLowerCase();
       var shown = 0;
-      for (var i = 0; i < cards.length; i++) {
-        var hit = !q || cards[i].getAttribute('data-search').indexOf(q) !== -1;
-        cards[i].hidden = !hit;
-        if (hit) shown++;
+      for (var i = 0; i < items.length; i++) {
+        var match = !query || items[i].getAttribute('data-search').indexOf(query) !== -1;
+        items[i].hidden = !match;
+        if (match) shown++;
       }
       for (var j = 0; j < sections.length; j++) {
-        var visible = sections[j].querySelector('[data-page]:not([hidden])');
-        sections[j].hidden = !visible;
+        sections[j].hidden = !sections[j].querySelector('[data-file]:not([hidden])');
       }
-      status.textContent = q ? shown + ' of ' + total + ' pages' : total + ' page' + (total === 1 ? '' : 's');
       empty.hidden = shown !== 0;
-    }
+    });
 
-    input.addEventListener('input', apply);
-    document.addEventListener('keydown', function (e) {
-      if (e.key === '/' && document.activeElement !== input) {
-        e.preventDefault();
+    document.addEventListener('keydown', function (event) {
+      if (event.key === '/' && document.activeElement !== input) {
+        event.preventDefault();
         input.focus();
-        input.select();
-      } else if (e.key === 'Escape' && document.activeElement === input) {
-        input.value = '';
-        apply();
-        input.blur();
       }
     });
-    apply();
   })();
 </script>
 </body>
