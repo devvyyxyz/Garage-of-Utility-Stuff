@@ -1,0 +1,1 @@
+This file triggers project contributors to automatically see the template's contents in a new pull request body. The template can customize and standardize the information you'd like included when contributors create pull requests.

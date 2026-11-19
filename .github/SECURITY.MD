@@ -1,0 +1,1 @@
+This file explains the project's security policies, such as a list of versions that are currently being maintained with security updates. This file also provides instructions on how users can submit a report of a vulnerability.

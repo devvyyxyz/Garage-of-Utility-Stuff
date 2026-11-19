@@ -1,0 +1,1 @@
+This file explains the repository's legal license, such as any legal rights, any copyright restrictions, etc. If you include a detectable license in your repository, people who visit your repository will see it at the top of the repository page.

@@ -1,0 +1,1 @@
+This file explains how a reader can get help with the repository and project. GitHub links this file on the page "New Issue". Unlike the "CONTRIBUTING" file, GitHub does not link this file on the page "New Pull Request".

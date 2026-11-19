@@ -1,0 +1,1 @@
+This file explains how people can contribute to the project. This file can help verify people are submitting well-formed pull requests and opening useful issues.
