@@ -61,6 +61,7 @@ function inline(text) {
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>')
+    .replace(/_([^_]+)_/g, '<em>$1</em>')
     .replace(/~~([^~]+)~~/g, '<del>$1</del>')
     .replace(/!\[([^\]]*)\]\(([^()\s]*(?:\([^()]*\)[^()\s]*)*)\)/g, '<img alt="$1" src="$2" loading="lazy">')
     .replace(/\[([^\]]+)\]\(([^()\s]*(?:\([^()]*\)[^()\s]*)*)\)/g, (_, label, url) => `<a href="${safeUrl(url)}">${label}</a>`);
@@ -76,9 +77,14 @@ function splitRow(line) {
 
 const TABLE_DIVIDER = /^\s*\|?\s*:?-{2,}:?\s*(?:\|\s*:?-{2,}:?\s*)+\|?\s*$/;
 
+/** Strip HTML comments from raw markdown so they are not rendered. */
+function stripComments(markdown) {
+  return markdown.replace(/<!--[\s\S]*?-->/g, '');
+}
+
 /** Block-level Markdown. Supports headings, lists, quotes, rules, code and paragraphs. */
 export function mdToHtml(markdown) {
-  const lines = markdown.replace(/\r\n?/g, '\n').split('\n');
+  const lines = stripComments(markdown).replace(/\r\n?/g, '\n').split('\n');
   const out = [];
   let paragraph = [];
   let listTag = null;
@@ -179,6 +185,18 @@ export function mdToHtml(markdown) {
         i++;
       }
       i--;
+      const alertMatch = quoted[0]?.match(/^\[!(\w+)\]\s*(.*)$/);
+      if (alertMatch) {
+        const type = alertMatch[1].toLowerCase();
+        const rest = alertMatch[2];
+        const valid = ['note', 'tip', 'important', 'warning', 'caution'];
+        if (valid.includes(type)) {
+          const title = type.charAt(0).toUpperCase() + type.slice(1);
+          const content = rest ? `\n${rest}\n${quoted.slice(1).join('\n')}` : quoted.slice(1).join('\n');
+          out.push(`<div class="markdown-alert markdown-alert-${type}">\n  <p class="markdown-alert-title">${title}</p>\n  ${mdToHtml(content)}\n</div>`);
+          continue;
+        }
+      }
       out.push(`<blockquote>${mdToHtml(quoted.join('\n'))}</blockquote>`);
       continue;
     }
@@ -249,6 +267,7 @@ const cleanedName = (name) => {
 function plain(text) {
   return text
     .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/\[!\w+\]/g, ' ')
     .replace(/`([^`]*)`/g, '$1')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
@@ -284,7 +303,8 @@ function mdExcerpt(markdown) {
     .replace(/^[ \t]*(?:```|~~~)[^\n]*\n[\s\S]*?^[ \t]*(?:```|~~~)[^\n]*$/gm, '')
     .replace(/^[ \t]{0,3}#{1,6}[ \t]+.*$/gm, '')
     .replace(/^[^\n]+\n[ \t]*={3,}[ \t]*$/gm, '')
-    .replace(/^[^\n]+\n[ \t]*-{3,}[ \t]*$/gm, '');
+    .replace(/^[^\n]+\n[ \t]*-{3,}[ \t]*$/gm, '')
+    .replace(/^[ \t]*>\s*\[![A-Z]+\].*$/gm, '');
 
   for (const block of body.split(/\r?\n[ \t]*\r?\n/)) {
     const lines = block.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
@@ -293,6 +313,9 @@ function mdExcerpt(markdown) {
     // Skip blocks that are not prose: lists, tables, HTML and rules.
     if (/^(?:[-*+]|\d+[.)])[ \t]+/.test(first)) continue;
     if (first.startsWith('|') || /^<[a-z!/]/i.test(first)) continue;
+    if (/^([-*_])[ \t]*(?:\1[ \t]*){2,}$/.test(first)) continue;
+    // Skip blockquotes (alerts, quotes) and rules from excerpts.
+    if (/^>/.test(first)) continue;
     if (/^([-*_])[ \t]*(?:\1[ \t]*){2,}$/.test(first)) continue;
     const text = plain(lines.join(' '));
     if (text) return text;
