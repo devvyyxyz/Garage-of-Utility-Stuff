@@ -1,6 +1,6 @@
 # Garage of Utility Stuff (GUS)
 
-A self-hosted utility web-app for tasks like file conversions, decrypting, and organizing files — all from one panel.
+A self-hosted utility web-app for tasks like file conversions, decrypting, and organizing files - all from one panel.
 
 ## Features
 
