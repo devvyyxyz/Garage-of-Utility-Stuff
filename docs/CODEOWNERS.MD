@@ -1,3 +1,3 @@
-This file defines individuals or teams that are responsible for code in a repository.
-
-Code owners are automatically requested for review when someone opens a pull request that modifies code that they own. When someone with admin or owner permissions has enabled required reviews, they also can optionally require approval from a code owner before the author can merge a pull request in the repository.
+> [!NOTE]
+> This file defines individuals or teams that are responsible for code in a repository.
+> Code owners are automatically requested for review when someone opens a pull request that modifies code that they own. When someone with admin or owner permissions has enabled required reviews, they also can optionally require approval from a code owner before the author can merge a pull request in the repository.
