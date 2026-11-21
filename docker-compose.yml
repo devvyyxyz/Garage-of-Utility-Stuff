@@ -1,0 +1,22 @@
+services:
+  gus:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    image: gus:latest
+    container_name: gus
+    restart: unless-stopped
+    ports:
+      - "${GUS_PORT:-3000}:3000"
+    volumes:
+      - gus_data:/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATA_DIR=/data
+      # - GUS_BASE_URL=http://localhost:3000
+
+volumes:
+  gus_data:
+    driver: local

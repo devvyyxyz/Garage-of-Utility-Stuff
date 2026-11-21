@@ -4,10 +4,16 @@
   "private": true,
   "description": "Garage of Utility Stuff documentation site",
   "scripts": {
-    "build": "node scripts/build-index.mjs",
-    "serve": "node scripts/serve.mjs",
-    "dev": "node scripts/serve.mjs --watch",
-    "start": "node scripts/serve.mjs"
+    "docs:build": "node scripts/build-index.mjs",
+    "docs:serve": "node scripts/serve.mjs",
+    "docs:dev": "node scripts/serve.mjs --watch",
+    "app:dev": "pnpm --filter web dev",
+    "app:build": "pnpm --filter web build",
+    "app:preview": "pnpm --filter web preview",
+    "app:check": "pnpm --filter web check",
+    "app:test": "pnpm --filter web test",
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build"
   },
   "engines": {
     "node": ">=20"
