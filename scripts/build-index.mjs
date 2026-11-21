@@ -9,7 +9,7 @@
  *
  * Run with: node scripts/build-index.mjs
  */
-import { readdir, readFile, writeFile, mkdir, unlink, copyFile, rm } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, unlink, copyFile, rm, stat } from 'node:fs/promises';
 import { join, relative, extname, basename, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
@@ -58,6 +58,7 @@ function safeUrl(url) {
 /** Inline Markdown: code, emphasis, strikethrough, images and links. Input must be escaped. */
 function inline(text) {
   return text
+    .replace(/<(https?:\/\/[^>\s]+)>/g, (_, url) => `<a href="${safeUrl(url)}">${url}</a>`)
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>')
@@ -167,7 +168,9 @@ export function mdToHtml(markdown) {
     if (heading) {
       flush();
       const level = heading[1].length;
-      out.push(`<h${level}>${inline(escapeHtml(heading[2].replace(/\s+#+\s*$/, '')))}</h${level}>`);
+      const text = heading[2].replace(/\s+#+\s*$/, '');
+const slug = text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+out.push(`<h${level} id="${escapeAttr(slug)}">${inline(escapeHtml(text))}<a class="anchor" href="#${escapeAttr(slug)}" aria-label="Link to this section">#</a></h${level}>`);
       continue;
     }
 
@@ -254,6 +257,9 @@ function prettifyName(file) {
     })
     .join(' ');
 }
+
+/** URL-safe slug for group page links. */
+const slugify = (text) => text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 /** Human label for a file or folder name: separators become spaces, case is kept. */
 const cleanedName = (name) => {
@@ -502,13 +508,50 @@ function formatDate(iso) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+/** Format a date (ISO string or Date) as a short human date, or "Unknown". */
+function formatDateValue(value) {
+  if (!value) return 'Unknown';
+  const date = value instanceof Date ? value : new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return 'Unknown';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/** Format a date value (mtime or ISO string) as a short human date, or "Unknown". */
+function formatAnyDate(value) {
+  if (!value) return 'Unknown';
+  if (value instanceof Date) return formatDateValue(value);
+  if (typeof value === 'string') return formatDate(value);
+  return 'Unknown';
+}
+
 /** Build the byline shown under each page title. */
 async function pageMeta(source, raw) {
   const info = await gitInfo(source);
   const author = info.author || 'Unknown';
   const updated = formatDate(info.dateISO);
   const read = estimateReadTime(raw);
-  return `<p class="page-meta">By <strong>${escapeHtml(author)}</strong> &middot; Updated ${escapeHtml(updated)} &middot; ${escapeHtml(read)}</p>`;
+  return `<p class="page-meta">By ${escapeHtml(author)} &middot; Updated ${escapeHtml(updated)} &middot; ${escapeHtml(read)}</p>`;
+}
+
+/** Build the footer shown at the bottom of every page. */
+async function pageFooter(source, raw, prefix) {
+  const info = await gitInfo(source);
+  const author = info.author || 'Unknown';
+  const updated = formatDate(info.dateISO);
+  const read = estimateReadTime(raw);
+  const buildDate = formatDateValue(new Date());
+  const licenseHtml = `<a href="${prefix}LICENSE.html">LICENSE</a>`;
+  return [
+    '<footer class="page-footer" aria-label="Page footer">',
+    '  <div class="footer-info">',
+    `    <p><strong>Last updated:</strong> ${escapeHtml(updated)}</p>`,
+    `    <p><strong>Author:</strong> ${escapeHtml(author)}</p>`,
+    `    <p><strong>License:</strong> ${licenseHtml}</p>`,
+    `    <p><strong>Reading time:</strong> ${escapeHtml(read)}</p>`,
+    `    <p><strong>Built:</strong> ${escapeHtml(buildDate)}</p>`,
+    '  </div>',
+    '</footer>',
+  ].join('\n');
 }
 
 /**
@@ -1001,7 +1044,7 @@ async function build() {
     const search = `${name} ${page.url} ${snippet.replace(/\n/g, ' ')}`.toLowerCase();
     return [
       `  <li data-file data-search="${escapeAttr(search)}">`,
-      `    <a href="${escapeAttr(page.url)}">`,
+      `    <a href="/${escapeAttr(page.url)}">`,
       `      ${icons.get(page.icon)}`,
       `      <span class="name">${escapeHtml(name)}</span>`,
       snippet ? `      <span class="snippet">${escapeHtml(snippet)}</span>` : '',
@@ -1013,7 +1056,7 @@ async function build() {
   // Build each group's file list, optionally with folder dropdowns.
   const folderBlock = (folder) => [
     '    <details class="folder">',
-    `      <summary>${icons.get('folder')} ${escapeHtml(folder.title)}</summary>`,
+    `      <summary>${icons.get('folder')} ${escapeHtml(folder.title)}<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>`,
     '      <ul class="files">',
     folder.pages.map((p) => item(p, p.shortName || p.name)).join('\n'),
     '      </ul>',
@@ -1036,7 +1079,7 @@ async function build() {
     }
     return [
       '  <section class="group" data-group>',
-      section.title ? `    <h2>${escapeHtml(section.title)}</h2>` : '',
+      section.title ? `    <h2><a href="/group.html?section=${escapeAttr(slugify(section.title))}">${escapeHtml(section.title)}</a></h2>` : '',
       ...rows,
       '  </section>',
     ].filter(Boolean).join('\n');
@@ -1049,22 +1092,15 @@ async function build() {
     const hasHeading = /^\s{0,3}#\s+/m.test(raw) || /^[^\n]+\n={3,}\s*$/m.test(raw);
     const metaHTML = await pageMeta(document.source, raw);
     let body = (hasHeading ? '' : `<h1>${escapeHtml(title)}</h1>\n`) + mdToHtml(raw);
-    body = body.replace(/(<h1>[\s\S]*?<\/h1>\n?)/, `$1\n${metaHTML}\n`);
+    body = body.replace(/(<h1>[\s\S]*?<\/h1>\n?)/, `$1${metaHTML}\n`);
 
     const section = sectionOf.get(page);
-    const folder = section ? section.folders.find((f) => f.pages.includes(page)) : null;
-    const related = folder
-      ? folder.pages.filter((other) => other !== page)
-      : section
-        ? section.pages.filter((other) => other !== page)
-        : [];
+    const related = section ? section.all.filter((other) => other !== page) : [];
     const relatedHeading = !section || !section.title
       ? 'Related pages'
       : section.title === 'Other'
         ? 'Other pages'
-        : folder
-          ? `More in ${folder.title}`
-          : `More in ${section.title}`;
+        : `More in ${section.title}`;
     const relatedHtml = related.length
       ? [
           '<nav class="related" aria-label="Related pages">',
@@ -1087,25 +1123,30 @@ async function build() {
       '<meta name="viewport" content="width=device-width, initial-scale=1">',
       `<title>${escapeHtml(title)} \u2014 ${escapeHtml(config.title)}</title>`,
       `${MARKER} from ${escapeHtml(page.sourceRel)} \u2014 do not edit. -->`,
+      '<script>(function(){try{var s=localStorage.getItem("theme");var t=s||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);document.documentElement.style.backgroundColor=t==="dark"?"#000":"#fff";}catch(e){}})();</script>',
       ...(hasGithubCss ? [`<link rel="stylesheet" href="${prefix}assets/github-markdown.css">`] : []),
       `<link rel="stylesheet" href="${prefix}assets/site.css">`,
       '</head>',
       `<body id="top">`,
       '<div class="layout">',
       '<aside class="all-pages" aria-label="All pages">',
-      '  <h2>All pages</h2>',
+      '  <h2>Pages</h2>',
       '  <input id="q" type="search" placeholder="Search" aria-label="Search files" autocomplete="off" spellcheck="false">',
       '  <div id="pages">',
       list,
       '  </div>',
       '  <p class="empty" id="empty" hidden>No matching files.</p>',
       '</aside>',
-      `<main class="markdown-body">\n${body}\n</main>`,
-      relatedHtml,
+      `<main class="markdown-body">\n${body}\n${relatedHtml}\n${await pageFooter(document.source, raw, prefix)}\n</main>`,
       '</div>',
+      '',
+      '<button class="sidebar-toggle" type="button" aria-label="Toggle page list" aria-expanded="false">',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
+      '</button>',
+      '<div class="sidebar-backdrop" hidden></div>',
       '<div class="fabs">',
-      `<a class="back" href="${prefix}index.html" aria-label="Back" title="Back">`,
-      '<svg class="top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 18l-3-3 3-3"/></svg>',
+      `<a class="back" href="${prefix}index.html" aria-label="Home" title="Home">`,
+      '<svg class="top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
       '</a>',
       '<button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">',
       '<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
@@ -1143,10 +1184,37 @@ async function build() {
       '',
       '    document.addEventListener(\'keydown\', function (event) {',
       '      if (event.key === \'/\' && document.activeElement !== input) {',
-      '        event.preventDefault();',
+      '      event.preventDefault();',
       '        input.focus();',
       '      }',
       '    });',
+      '',
+      '    var sidebar = document.querySelector(\'.all-pages\');',
+      '    var scrollKey = \'sidebar-scroll\';',
+      '    if (sidebar) {',
+      '      var savedScroll = sessionStorage.getItem(scrollKey);',
+      '      if (savedScroll !== null) sidebar.scrollTop = Number(savedScroll);',
+      '      sidebar.addEventListener(\'scroll\', function () {',
+      '        sessionStorage.setItem(scrollKey, String(sidebar.scrollTop));',
+      '      });',
+      '    }',
+      '',
+      '    var toggle = document.querySelector(\'.sidebar-toggle\');',
+      '    var backdrop = document.querySelector(\'.sidebar-backdrop\');',
+      '    function setSidebar(open) {',
+      '      document.body.classList.toggle(\'sidebar-open\', open);',
+      '      toggle.setAttribute(\'aria-expanded\', String(open));',
+      '      backdrop.hidden = !open;',
+      '    }',
+      '    if (toggle) {',
+      '      toggle.addEventListener(\'click\', function () {',
+      '        setSidebar(!document.body.classList.contains(\'sidebar-open\'));',
+      '      });',
+      '      backdrop.addEventListener(\'click\', function () { setSidebar(false); });',
+      '      document.addEventListener(\'keydown\', function (event) {',
+      '        if (event.key === \'Escape\') setSidebar(false);',
+      '      });',
+      '    }',
       '  })();',
       '</script>',
       '</body>',
@@ -1168,20 +1236,94 @@ async function build() {
       const hasHeading = /^\s{0,3}#\s+/m.test(raw) || /^[^\n]+\n={3,}\s*$/m.test(raw);
       const metaHTML = await pageMeta(source, raw);
       let body = (hasHeading ? '' : `<h1>${escapeHtml(config.title)}</h1>\n`) + mdToHtml(raw);
-      body = body.replace(/(<h1>[\s\S]*?<\/h1>\n?)/, `$1\n${metaHTML}\n`);
+      body = body.replace(/(<h1>[\s\S]*?<\/h1>\n?)/, `$1${metaHTML}\n`);
       content = body;
     }
   }
   if (!content) content = `<h1>${escapeHtml(config.title)}</h1>`;
 
   const template = await readFile(TEMPLATE, 'utf8');
+  const buildDate = formatDateValue(new Date());
+  let lastUpdated = 'Unknown', author = 'Unknown', readTime = 'Unknown';
+  if (homePage) {
+    const source = join(ROOT, homeRel);
+    const raw = await readFile(source, 'utf8').catch(() => '');
+    if (raw) {
+      const info = await gitInfo(source);
+      lastUpdated = formatDate(info.dateISO);
+      author = info.author || 'Unknown';
+      readTime = estimateReadTime(raw);
+    }
+  }
   const index = template
     .replaceAll('%TITLE%', escapeHtml(config.title))
     .replaceAll('%CONTENT%', content)
     .replaceAll('%LIST%', list)
-    .replaceAll('%COUNT%', `${listed.length} page${listed.length === 1 ? '' : 's'}`);
+    .replaceAll('%COUNT%', `${listed.length} page${listed.length === 1 ? '' : 's'}`)
+    .replaceAll('%LAST_UPDATED%', escapeHtml(lastUpdated))
+    .replaceAll('%AUTHOR%', escapeHtml(author))
+    .replaceAll('%READ_TIME%', escapeHtml(readTime))
+    .replaceAll('%BUILD_DATE%', escapeHtml(buildDate));
 
   await writeFile(join(OUT_DIR, 'index.html'), `${MARKER} \u2014 do not edit. -->\n${index}`, 'utf8');
+
+  // Group pages: /group.html?section=<slug> shows all pages in one sidebar group.
+  const groupSections = sections.map((section) => {
+    const slug = slugify(section.title || 'pages');
+    const cards = section.all.map((page) => {
+      const snippet = typeof page.snippet === 'string' ? page.snippet : '';
+      return [
+        '    <li>',
+        `      <a href="${escapeAttr(page.url)}">`,
+        `        ${icons.get(page.icon)}`,
+        `        <span class="name">${escapeHtml(page.name)}</span>`,
+        snippet ? `        <span class="snippet">${escapeHtml(snippet)}</span>` : '',
+        '      </a>',
+        '    </li>',
+      ].filter(Boolean).join('\n');
+    }).join('\n');
+    return [
+      `<section class="group-page" data-section="${escapeAttr(slug)}">`,
+      `  <h1>${escapeHtml(section.title || 'Pages')}</h1>`,
+      `  <ul class="group-cards">`,
+      cards,
+      '  </ul>',
+      '</section>',
+    ].join('\n');
+  }).join('\n');
+
+  const groupScript = [
+    '<script>',
+    '  (function () {',
+    '    var slug = new URLSearchParams(location.search).get(\'section\');',
+    '    var sections = document.querySelectorAll(\'[data-section]\');',
+    '    var matched = false;',
+    '    for (var i = 0; i < sections.length; i++) {',
+    '      var show = sections[i].getAttribute(\'data-section\') === slug;',
+    '      sections[i].hidden = !show;',
+    '      if (show) {',
+    '        matched = true;',
+    '        var heading = sections[i].querySelector(\'h1\');',
+    '        if (heading) document.title = heading.textContent + \' — \' + document.title;',
+    '      }',
+    '    }',
+    '    if (!matched && sections.length) sections[0].hidden = false;',
+    '  })();',
+    '</script>',
+  ].join('\n');
+
+  const groupContent = `${groupSections}\n${groupScript}`;
+  const groupHtml = template
+    .replaceAll('%TITLE%', escapeHtml(`${config.title} — Pages`))
+    .replaceAll('%CONTENT%', groupContent)
+    .replaceAll('%LIST%', list)
+    .replaceAll('%COUNT%', `${listed.length} page${listed.length === 1 ? '' : 's'}`)
+    .replaceAll('%LAST_UPDATED%', escapeHtml(buildDate))
+    .replaceAll('%AUTHOR%', 'Unknown')
+    .replaceAll('%READ_TIME%', 'Unknown')
+    .replaceAll('%BUILD_DATE%', escapeHtml(buildDate));
+
+  await writeFile(join(OUT_DIR, 'group.html'), `${MARKER} \u2014 do not edit. -->\n${groupHtml}`, 'utf8');
 
   for (const warning of warnings) console.warn(`warning: ${warning}`);
   console.log(`site: ${pages.length} page(s) in ${sections.length} section(s) -> _site/`);

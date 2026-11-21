@@ -1,0 +1,44 @@
+/* ==============================================================
+   layout.css — page grid, content column, and sidebar container
+   ============================================================== */
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+  min-width: 100%;
+}
+
+/* Content first on narrow screens; the page list sits below it. */
+.markdown-body {
+  order: 1;
+  padding: 2rem 1.25rem 0;
+  min-width: 0;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.markdown-body .page-footer {
+  margin-top: auto;
+}
+
+.markdown-body h1 {
+  text-align: center;
+  font-weight: 900;
+}
+
+/* Sidebar container (the page list lives inside). */
+.all-pages {
+  order: 2;
+  padding: 1.5rem 1.25rem 3rem;
+  border-top: 1px solid var(--border);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.all-pages::-webkit-scrollbar {
+  display: none;
+}

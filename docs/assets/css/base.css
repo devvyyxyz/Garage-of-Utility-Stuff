@@ -1,0 +1,93 @@
+/* ==============================================================
+   base.css — variables, reset, and base typography
+   ============================================================== */
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --text: #1b222c;
+  --muted: #5c6875;
+  --border: #e3e7ec;
+  --surface: #ffffff;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #000000;
+  --text: #ffffff;
+  --muted: #a1a1a1;
+  --border: #262626;
+  --surface: #000000;
+}
+
+.markdown-body {
+  color: var(--text);
+  background: var(--bg);
+}
+
+[data-theme="dark"] .markdown-body table,
+[data-theme="dark"] .markdown-body table th,
+[data-theme="dark"] .markdown-body table td {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+[data-theme="dark"] .markdown-body table tr:nth-child(2n) {
+  background: var(--bg);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Bold, underlined links inside rendered Markdown. */
+.markdown-body a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.markdown-body a:hover {
+  color: var(--muted);
+}
+
+.markdown-body .anchor {
+  margin-left: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  text-decoration: none;
+  font-weight: 400;
+}
+
+.markdown-body h1:hover .anchor,
+.markdown-body h2:hover .anchor,
+.markdown-body h3:hover .anchor,
+.markdown-body h4:hover .anchor,
+.markdown-body h5:hover .anchor,
+.markdown-body h6:hover .anchor {
+  opacity: 1;
+}

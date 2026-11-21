@@ -1,0 +1,352 @@
+/* ==============================================================
+   components.css — page meta, floating buttons, theme toggle,
+   copy button, and page footer
+   ============================================================== */
+
+/* ------------------------------ page meta ------------------------------ */
+
+.page-meta {
+  margin-top: 0.5rem;
+  padding-top: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.page-meta strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ------------------------ floating page buttons ------------------------ */
+
+.fabs {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.fabs a {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--muted);
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.fabs a:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+.fabs a.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: default;
+}
+
+.fabs a.disabled svg {
+  color: var(--muted);
+}
+
+.fabs a:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.fabs a svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 0.4s ease;
+}
+
+/* Back-to-top button with scroll progress ring. */
+.fabs .top {
+  position: relative;
+}
+
+.fabs .top .ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.fabs .top .ring circle {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.fabs .top .ring-track {
+  stroke: var(--border);
+}
+
+.fabs .top .ring-bar {
+  stroke: var(--text);
+  stroke-linecap: round;
+  stroke-dasharray: 106.8;
+  stroke-dashoffset: 106.8;
+  transition: stroke-dashoffset 80ms linear;
+}
+
+.fabs .top .top-icon {
+  position: relative;
+  z-index: 1;
+}
+
+/* ----------------------------- theme toggle ---------------------------- */
+
+.fabs .theme-toggle {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--muted);
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.fabs .theme-toggle svg {
+  grid-area: 1 / 1;
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+  transition: opacity 0.3s, transform 0.4s ease;
+}
+
+/* Sun: visible in light, hides in dark. */
+.fabs .theme-toggle .icon-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.fabs .theme-toggle[data-theme="dark"] .icon-sun {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+/* Moon: hidden in light, shows in dark (no flip). */
+.fabs .theme-toggle .icon-moon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+.fabs .theme-toggle[data-theme="dark"] .icon-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* ----------------------------- copy button ----------------------------- */
+
+pre {
+  position: relative;
+  overflow: auto;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font: 0.7rem/1 system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+pre:hover .copy-btn,
+.copy-btn:focus-visible {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.copy-btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.copy-btn svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.copy-btn.copied {
+  color: #2da44e;
+  border-color: #2da44e;
+  opacity: 1;
+}
+
+[data-theme="dark"] .copy-btn.copied {
+  color: #3fb950;
+  border-color: #3fb950;
+}
+
+/* ---------------------------- group pages ------------------------------ */
+
+.group-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.group-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.group-cards li a {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.6rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.group-cards li a:hover {
+  border-color: var(--muted);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.group-cards .icon {
+  grid-row: 1 / span 2;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--muted);
+}
+
+.group-cards .name {
+  font-weight: 600;
+}
+
+.group-cards .snippet {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.all-pages .group h2 a {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.all-pages .group h2 a:hover {
+  color: var(--text);
+}
+
+/* ---------------------------- related pages ---------------------------- */
+
+.related {
+  margin-top: 2rem;
+  padding-top: 0;
+}
+
+.related h2 {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.related ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.related li {
+  margin: 0;
+}
+
+.related li a {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.related li a:hover {
+  border-color: var(--muted);
+}
+
+.related .icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* ----------------------------- page footer ----------------------------- */
+
+.page-footer {
+  margin-top: 4rem;
+  padding: 1.5rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.page-footer .footer-info {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.page-footer .footer-info p {
+  margin: 0;
+}
+
+.page-footer .footer-info strong {
+  color: var(--text);
+}
+
+.page-footer .footer-info a {
+  color: var(--muted);
+  text-decoration: underline;
+}
